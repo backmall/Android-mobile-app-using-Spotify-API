@@ -1,0 +1,46 @@
+<resources>
+    // Strings for the app
+    <string name="app_name">RecordBox</string>
+    <string name="record_string">Record</string>
+    <string name="box_string">Box</string>
+
+    //string use for search page
+    <string name="example_search"></string>
+    <string name="search">Search</string>
+    <string name="no_result">No results</string>
+
+    // String will be use to store name of artist,albums name, song name
+    <string name="Artist"></string>
+    <string name="Song"></string>
+    <string name="Album"></string>
+
+
+    // Navigation content description
+    <string name="btnImg_Home">Home Button</string>
+    <string name="btnImg_Magnifying">Search Button</string>
+    <string name="btnImg_ContactUs">Contact us Button</string>
+
+    // Home Page content description and Text
+    <string name="btnImg_logo_play_">Logo Play Button</string>
+    <string name="My_">My</string>
+    <string name="MyAlbum">albums</string>
+    <string name="aArtist">Artist</string>
+
+
+    // Search Hint
+    <string name="search_hint">Artist,Songs or Albums</string>
+
+
+    // Content description
+    <string name="discrtion_add_btn">Add button</string>
+
+    // Back Arrow Description
+    <string name="arrow_description">Back Arrow</string>
+
+
+    // Navigation string
+    <string name="homeNav">Home</string>
+    <string name="searchNav">Search</string>
+    <string name="contactUs">Contact Us</string>
+
+</resources>
