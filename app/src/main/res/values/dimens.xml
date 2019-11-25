@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="app_name_size">26sp</dimen>
+    <dimen name="nav_icon_size_width">26sp</dimen>
+    <dimen name="nav_icon_size_height">26sp</dimen>
+</resources>
