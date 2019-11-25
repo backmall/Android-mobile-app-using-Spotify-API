@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -148,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
             switch (response.getType()) {
                 // Response was successful and contains auth token
                 case TOKEN:
-                    Log.d("Main Activity", "Mamy tokena");
+                    Toast.makeText(getApplicationContext(),"Molin nigdy nie miał kobiety",Toast.LENGTH_SHORT).show();
                     break;
 
                 // Auth flow returned an error
