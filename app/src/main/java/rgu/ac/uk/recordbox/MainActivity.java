@@ -4,16 +4,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
-import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -22,9 +20,6 @@ import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
 
-import com.spotify.protocol.client.Subscription;
-import com.spotify.protocol.types.PlayerState;
-import com.spotify.protocol.types.Track;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
@@ -36,9 +31,9 @@ public class MainActivity extends AppCompatActivity {
     private static final String CLIENT_ID = "550008f745f044b7a3a4897a11dd0958";
     private static final String REDIRECT_URI = "http://localhost:4002/";
     private static final int REQUEST_CODE = 1337;
-    private SpotifyAppRemote mSpotifyAppRemote;
 
-    // Spotify auth-token
+    // Local Storage
+    private SharedPreferences.Editor editor;
 
 
     @Override
@@ -46,16 +41,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Spotify authentication
-        // Request code will be used to verify if result comes from the login activity. Can be set to any integer.
-        AuthenticationRequest.Builder builder =
-                new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
-
-        builder.setScopes(new String[]{"streaming"});
-        AuthenticationRequest request = builder.build();
-
-        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
-
+        // Get Token from Spotify
+        getTokenFromSpotify();
 
         //Logo Text colorSpan
         //select the word box and make it orange
@@ -98,38 +85,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
-        // Get authentication
-        ConnectionParams connectionParams =
-                new ConnectionParams.Builder(CLIENT_ID)
-                        .setRedirectUri(REDIRECT_URI)
-                        .showAuthView(true)
-                        .build();
-
-        // Connect to Spotify Remote
-        SpotifyAppRemote.connect(this, connectionParams,
-                new Connector.ConnectionListener() {
-
-                    @Override
-                    public void onConnected(SpotifyAppRemote spotifyAppRemote) {
-                        mSpotifyAppRemote = spotifyAppRemote;
-                        Log.d("MainActivity", "Connected! Yay!");
-
-                        // Now you can start interacting with App Remote
-                        connected();
-                    }
-
-                    @Override
-                    public void onFailure(Throwable throwable) {
-                        Log.e("MainActivity", throwable.getMessage(), throwable);
-
-                        // Something went wrong when attempting to connect! Handle errors here
-                    }
-                });
-    }
-
-    private void connected() {
-        // Then we will write some more code here.
     }
 
     @Override
@@ -149,12 +104,17 @@ public class MainActivity extends AppCompatActivity {
             switch (response.getType()) {
                 // Response was successful and contains auth token
                 case TOKEN:
-                    Toast.makeText(getApplicationContext(),"Molin nigdy nie miał kobiety",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(),"Successfully logged into Spotify",Toast.LENGTH_SHORT).show();
+                    editor = getSharedPreferences("SPOTIFY", 0).edit();
+                    editor.putString("token", response.getAccessToken());
+                    Log.d("STARTING", "GOT AUTH TOKEN");
+                    editor.apply();
                     break;
 
                 // Auth flow returned an error
                 case ERROR:
-                    // Handle error response
+                    // Try Again
+                    getTokenFromSpotify();
                     break;
 
                 // Most likely auth flow was cancelled
@@ -162,6 +122,18 @@ public class MainActivity extends AppCompatActivity {
                     // Handle other cases
             }
         }
+    }
+
+    private void getTokenFromSpotify(){
+
+        // Request code will be used to verify if result comes from the login activity. Can be set to any integer.
+        AuthenticationRequest.Builder builder =
+                new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
+
+        builder.setScopes(new String[]{"streaming"});
+        AuthenticationRequest request = builder.build();
+
+        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
     }
 
 }
