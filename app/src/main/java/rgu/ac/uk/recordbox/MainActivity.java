@@ -14,15 +14,25 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import com.spotify.android.appremote.api.ConnectionParams;
-import com.spotify.android.appremote.api.Connector;
-import com.spotify.android.appremote.api.SpotifyAppRemote;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import rgu.ac.uk.recordbox.tools.RequestsManager;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -35,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
     // Local Storage
     private SharedPreferences.Editor editor;
 
+    // Request output
+    JSONObject output = new JSONObject();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,12 +106,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    protected void onActivityResult(final int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
         // Check if result comes from the correct activity
         if (requestCode == REQUEST_CODE) {
-            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
+            final AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
 
             switch (response.getType()) {
                 // Response was successful and contains auth token
@@ -108,7 +120,51 @@ public class MainActivity extends AppCompatActivity {
                     editor = getSharedPreferences("SPOTIFY", 0).edit();
                     editor.putString("token", response.getAccessToken());
                     Log.d("STARTING", "GOT AUTH TOKEN");
+                    Log.d("STARTING", response.getAccessToken());
                     editor.apply();
+
+                    //url with request
+                    String url = "https://api.spotify.com/v1/search?q=Daft+Punk&type=track&limit=2";
+
+                    JsonObjectRequest getRequest = new JsonObjectRequest(
+                            Request.Method.GET,
+                            url,
+                            null,
+                            new Response.Listener<JSONObject>(){
+
+                                @Override
+                                public void onResponse(JSONObject requestResponse) {
+                                    Log.d("REQUEST", "WE DID IT");
+                                    Log.d("REQUEST", requestResponse.toString());
+                                    output = requestResponse;
+                                }
+                            },
+                            new Response.ErrorListener()
+                            {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    // TODO Auto-generated method stub
+                                    Log.d("REQUEST", "WE FAILED");
+                                    Log.e("REQUEST", error.toString());
+                                }
+                            }
+                    ) {
+                        @Override
+                        public Map<String, String> getHeaders(){
+                            Map<String, String>  params = new HashMap<>();
+                            params.put("Authorization", "Bearer " + response.getAccessToken());
+
+                            return params;
+                        }
+                    };
+
+                    RequestQueue queue = Volley.newRequestQueue(this);
+                    queue.add(getRequest);
+                    queue.start();
+
+                    Log.d("SPERMA", "sperma");
+                    Log.d("OUTPUT", output.toString());
+
                     break;
 
                 // Auth flow returned an error
