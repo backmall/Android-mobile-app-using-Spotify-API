@@ -26,16 +26,24 @@ import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
 
 import rgu.ac.uk.recordbox.tools.RequestsManager;
-
+//json handling
+import rgu.ac.uk.recordbox.jsonObjects.Tracks;
+import rgu.ac.uk.recordbox.jsonObjects.Items;
+import rgu.ac.uk.recordbox.jsonObjects.artistName;
 
 public class MainActivity extends AppCompatActivity {
+
+    //arraylist for json object
+    private ArrayList<Items> allItemsData = new ArrayList<>();
 
     // Spotify fields
     private static final String CLIENT_ID = "550008f745f044b7a3a4897a11dd0958";
@@ -137,6 +145,44 @@ public class MainActivity extends AppCompatActivity {
                                     Log.d("REQUEST", "WE DID IT");
                                     Log.d("REQUEST", requestResponse.toString());
                                     output = requestResponse;
+
+                                    //handling the output starts here
+                                    //TODO saving the output to memory
+
+                                    try {
+                                        JSONArray outputarray = requestResponse.getJSONObject("tracks").getJSONArray("items");
+                                        allItemsData.clear();
+
+                                        //adding items to arraylist
+                                        for(int i=0 ; i <outputarray.length() ; i++){
+                                            JSONObject data = outputarray.getJSONObject(i);
+                                            Items item = new Items(data);
+                                            //ArrayList of Items objects
+                                            allItemsData.add(item);
+                                        }
+
+                                    }catch (JSONException e){
+                                        e.toString();
+                                    }
+                                    //test output
+                                    String songName = allItemsData.get(0).name;
+                                    Log.d("REQUEST2", songName);
+                                    String artistName = allItemsData.get(0).allArtistName.get(0).name;
+                                    Log.d("REQUEST3", artistName);
+
+                                    //automated output
+                                    for(Items it: allItemsData){
+                                        for(artistName artName : it.allArtistName){
+                                            String songN = it.name;
+                                            String artistN = artName.name;
+                                            String result = "Song: " + songN + " Artist: " + artistN;
+                                            Log.d("FINAL", result);
+                                        }
+                                    }
+
+
+
+                                    //handling the output ends here
                                 }
                             },
                             new Response.ErrorListener()
